@@ -1,0 +1,5 @@
+﻿---
+- title: username= and password=
+  marker: username=
+  regex: username=[^\x00]+\&password=[^\x00]+
+  url_decode: true
