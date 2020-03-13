@@ -31,11 +31,10 @@ namespace MemSearch
             long totalBytes = 0;
             DateTime start = DateTime.Now;
 
-            var processes = Process.GetProcesses().Where((p) => System.Text.RegularExpressions.Regex.IsMatch(p.ProcessName, processFilter));
-            processes.ToList().ForEach(x => Console.WriteLine($"Matched process {x.ProcessName}"));
-
-            foreach (var proc in processes)
+            foreach (var proc in Process.GetProcesses().Where((p) => System.Text.RegularExpressions.Regex.IsMatch(p.ProcessName, processFilter, System.Text.RegularExpressions.RegexOptions.IgnoreCase)))
             {
+                Console.WriteLine($"Matched process {proc.ProcessName}");
+
                 foreach (var chunk in ProcessReader.ReadMemory((IntPtr)proc.Id))
                 {
                     totalBytes += chunk.Length;

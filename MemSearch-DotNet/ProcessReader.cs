@@ -29,15 +29,20 @@ namespace MemSearch
             else
                 Console.WriteLine($"Got process handle {processHandle} for pid {processId}");
 
-            while (current.ToInt64() < maxAddress.ToInt64() && Imports.VirtualQueryEx(processHandle, current, out Imports.MEMORY_BASIC_INFORMATION mem_basic_info, dwLength) != 0)
+            // While 1) inside process memory bounds and 2) Getting memory information didn't fail
+            while (current.ToInt64() < maxAddress.ToInt64() 
+                && Imports.VirtualQueryEx(processHandle, current, out Imports.MEMORY_BASIC_INFORMATION memBasicInfo, dwLength) != 0)
             {
                 // if this memory chunk is accessible
-                if (mem_basic_info.Protect == Imports.PAGE_READWRITE && mem_basic_info.State == Imports.MEM_COMMIT)
+                if (memBasicInfo.Protect == Imports.PAGE_READWRITE && memBasicInfo.State == Imports.MEM_COMMIT)
                 {
-                    byte[] buffer = new byte[(int)mem_basic_info.RegionSize];
+                    // Read the whole region at once
+                    byte[] buffer = new byte[(int)memBasicInfo.RegionSize];
 
-                    if (Imports.ReadProcessMemory(processHandle, mem_basic_info.BaseAddress, buffer, (int)mem_basic_info.RegionSize, out IntPtr bytesRead))
+                    // Attempt to read process memory
+                    if (Imports.ReadProcessMemory(processHandle, memBasicInfo.BaseAddress, buffer, (int)memBasicInfo.RegionSize, out IntPtr bytesRead))
                     {
+                        // If the sizes don't match for whatever reason, notify someone
                         if (bytesRead.ToInt32() != buffer.Length)
                             Console.WriteLine($"Size wrong while reading chunk, reported length: {bytesRead}, actual length: {buffer.Length}");
                         yield return buffer;
@@ -47,7 +52,7 @@ namespace MemSearch
                 }
 
                 // move to the next memory chunk
-                current = (IntPtr)(mem_basic_info.BaseAddress.ToInt64() + mem_basic_info.RegionSize.ToInt64());
+                current = (IntPtr)(memBasicInfo.BaseAddress.ToInt64() + memBasicInfo.RegionSize.ToInt64());
             }
         }
     }
