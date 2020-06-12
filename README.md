@@ -2,6 +2,8 @@
 
 .NET targeting latest framework (4.7) and AnyCPU. Should work against x86 and x64 processes. Doesn't need special privileges like `SeDebugPrivilege`.
 
+Motivation: Someone at work built a similar program, and I was like "how hard could that be"? So even though it is fairly useless, here it is. 
+
 ## Config
 
 Follow this format:
